@@ -1,23 +1,10 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-
-        System.out.println("Введите первое число:");
-        int firstNumber = new Scanner(System.in).nextInt();
-        System.out.println("Введите второе число:");
-        int secondNumber = new Scanner(System.in).nextInt();
-        int sum = firstNumber + secondNumber;
-        int diff = firstNumber - secondNumber;
-        int multi = firstNumber * secondNumber;
-        double quotient = (double) firstNumber % secondNumber;
-
-        System.out.println("Сумма: " + sum);
-        System.out.println("Разность: " + diff);
-        System.out.println("Произведение: " + multi);
-        System.out.println("Частное: " + quotient);
-
         int count = 0;
         while (true) {
             System.out.println("Укажите путь к файлу, который программма будет парсить: ");
@@ -34,6 +21,36 @@ public class Main {
                 count++;
             }
             System.out.println("Это файл номер " + count);
+            int lines = 0;
+            int max = 0;
+            int min = 0;
+            try {
+                FileReader fileReader = new FileReader(path);
+                BufferedReader reader = new BufferedReader(fileReader);
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    lines++;
+                    int length = line.length();
+                    if (length > max)
+                        max = length;
+                    if (length < min)
+                        min = length;
+                }
+                System.out.println("Общее количество строк в файле: " + lines);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            if (max > 1024) {
+                throw new exceedingCharacters("в файле встретилась строка длиннее 1024 символов");
+            }
+            System.out.println("Длина самой длинной строки в файле: " + max);
+            System.out.println("Длина самой короткой строки в файле: " + min);
         }
+    }
+}
+
+class exceedingCharacters extends RuntimeException {
+    public exceedingCharacters(String message) {
+        super(message);
     }
 }
