@@ -11,11 +11,14 @@ public class Statistics {
       private HashSet<String> nonExistPages = new HashSet<>();
       private HashMap<String, Integer> typeSysCount = new HashMap<>();
       private HashMap<String, Integer> browserCount = new HashMap<>();
-
       private int totalVisit = 0;
       private int totalError = 0;
       private Map<String, Integer> userVisit = new HashMap<>();
       private Set<String> bots = new HashSet<>();
+      private Map<Integer, Integer> visitsPerSecond = new HashMap<>();
+      private Set<String> referringDomains = new HashSet<>();
+      private Map<String, Integer> visitsPerUser = new HashMap<>();
+      private Set<String> botUserAgents = new HashSet<>();
 
       UserAgent userAgent;
       public Statistics() {
@@ -81,15 +84,59 @@ public class Statistics {
             if(logEntry.getResponseCode() >= 400 && logEntry.getResponseCode() < 600) {
                   totalError++;
             }
+
+            if(!isBot(userAgent)) {
+                  visitsPerUser.put(logEntry.ipAddress, visitsPerUser.getOrDefault(logEntry.ipAddress, 0) + 1);
+            }
+
             if(!isBot(userAgent)) {
                   userVisit.put(logEntry.ipAddress, userVisit.getOrDefault(logEntry.ipAddress, 0) + 1);
             }
+
             typeSysCount.put(String.valueOf(userAgent.getTypeSys()), typeSysCount.getOrDefault(userAgent.getTypeSys(), 0) + 1);
             browserCount.put(String.valueOf(userAgent.getBrowser()), browserCount.getOrDefault(userAgent.getBrowser(), 0) + 1);
 
           listPages.add(logEntry);
       }
 
+      public int getCurrSecond() {
+            return (int) System.currentTimeMillis() / 1000;
+      }
+
+      public void addReferringDomains(String referer) {
+            if(referer != null) {
+                  String domain = extractDomain(referer);
+                  referringDomains.add(domain);
+            }
+      }
+      public int calculationPeakVisitPerSec() {
+            return visitsPerSecond
+                    .values()
+                    .stream()
+                    .mapToInt(Integer :: intValue)
+                    .max()
+                    .orElse(0);
+      }
+
+      public Set<String> getReferringDomains() {
+            return referringDomains;
+      }
+
+      public int calcMaxVisitPerUser()  {
+            return visitsPerUser
+                    .values()
+                    .stream()
+                    .mapToInt(Integer :: intValue)
+                    .max()
+                    .orElse(0);
+      }
+      public String extractDomain (String url) {
+            String domain = url.split("/")[2];
+            if(domain.startsWith("www.")) {
+                  domain = domain.substring(4);
+            }
+          return domain;
+      }
       public boolean isBot(UserAgent userAgent) {
             return userAgent.toString().contains("bot");
       }
