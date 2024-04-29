@@ -88,6 +88,10 @@ public class Statistics {
             if(!isBot(userAgent)) {
                   visitsPerUser.put(logEntry.ipAddress, visitsPerUser.getOrDefault(logEntry.ipAddress, 0) + 1);
             }
+            addReferringDomains(logEntry.referer);
+
+            int second = getCurrSecond();
+            visitsPerSecond.put(second, visitsPerSecond.getOrDefault(second, 0) + 1);
 
             if(!isBot(userAgent)) {
                   userVisit.put(logEntry.ipAddress, userVisit.getOrDefault(logEntry.ipAddress, 0) + 1);
@@ -109,7 +113,7 @@ public class Statistics {
                   referringDomains.add(domain);
             }
       }
-      public int calculationPeakVisitPerSec() {
+      public int calcPeakVisitPerSec() {
             return visitsPerSecond
                     .values()
                     .stream()
