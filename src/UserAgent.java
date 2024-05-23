@@ -46,6 +46,10 @@ public class UserAgent {
         }
     }
 
+    public boolean isBot() {
+        return userAgentStr.contains("bot");
+    }
+
     enum TypeSys {
         WINDOWS, MACOS, LINUX;
     }

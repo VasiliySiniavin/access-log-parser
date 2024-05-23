@@ -4,8 +4,8 @@ import java.util.*;
 
 public class Statistics {
       private int totalTraffic;
-      private LocalDateTime minTime;
-      private LocalDateTime maxTime;
+      private LocalDateTime minTime = LocalDateTime.MAX;
+      private LocalDateTime maxTime = LocalDateTime.MIN;;
       private HashSet<LogEntry> listPages;
       private HashSet<String> existPages = new HashSet<>();
       private HashSet<String> nonExistPages = new HashSet<>();
@@ -18,14 +18,12 @@ public class Statistics {
       private Map<Integer, Integer> visitsPerSecond = new HashMap<>();
       private Set<String> referringDomains = new HashSet<>();
       private Map<String, Integer> visitsPerUser = new HashMap<>();
-      private Set<String> botUserAgents = new HashSet<>();
+
 
       UserAgent userAgent;
       public Statistics() {
           this.totalTraffic = 0;
-            this.minTime = null;
-            this.maxTime = null;
-            this.listPages = new HashSet<>();
+          this.listPages = new HashSet<>();
       }
       public HashMap<String, Double> getTypeSysCount() {
             HashMap<String, Double> sysStatistic = new HashMap<>();
@@ -68,10 +66,10 @@ public class Statistics {
             LocalDateTime logEntryTime = logEntry.getDateTime();
             totalVisit++;
 
-            if (this.minTime == null || logEntryTime.isBefore(minTime)) {
+            if (logEntryTime.isBefore(minTime)) {
                   minTime = logEntryTime;
             }
-            if (this.maxTime == null || logEntryTime.isBefore(maxTime)) {
+            if (logEntryTime.isAfter(maxTime)) {
                   maxTime = logEntryTime;
             }
             if (logEntry.getResponseCode() == 200) {
@@ -85,7 +83,7 @@ public class Statistics {
                   totalError++;
             }
 
-            if(!isBot(userAgent)) {
+            if(!userAgent.isBot()) {
                   visitsPerUser.put(logEntry.ipAddress, visitsPerUser.getOrDefault(logEntry.ipAddress, 0) + 1);
             }
             addReferringDomains(logEntry.referer);
@@ -93,7 +91,7 @@ public class Statistics {
             int second = getCurrSecond();
             visitsPerSecond.put(second, visitsPerSecond.getOrDefault(second, 0) + 1);
 
-            if(!isBot(userAgent)) {
+            if(!userAgent.isBot()) {
                   userVisit.put(logEntry.ipAddress, userVisit.getOrDefault(logEntry.ipAddress, 0) + 1);
             }
 
@@ -141,15 +139,13 @@ public class Statistics {
             }
           return domain;
       }
-      public boolean isBot(UserAgent userAgent) {
-            return userAgent.toString().contains("bot");
-      }
-      public double getAvgTotalVisitPerHour(double hours) {
-            return totalVisit / hours;
+
+      public double getAvgTotalVisitPerHour() {
+            return totalVisit;
       }
 
-      public double getTotalErrorPerHour(double hours) {
-            return totalError / hours;
+      public double getTotalErrorPerHour() {
+            return totalError;
       }
 
       public double getAvgVisitPerUser() {
